@@ -1,0 +1,28 @@
+/* Styling for Minesweeper Cells */
+.cell {
+    width: 30px; /* Adjust to match your image width */
+    height: 30px; /* Adjust to match your image height */
+    border: 1px solid #ccc; /* Border style for cells */
+    cursor: pointer;
+    background-color: #eee; /* Background color for unopened cells */
+    padding: 0;
+    margin: 0;
+}
+
+/* Styling for Opened Cells */
+.cell.opened {
+    background-color: #fff; /* Background color for opened cells */
+}
+
+/* Styling for Flagged Cells */
+.cell.flagged {
+    background-color: #fff; /* Background color for flagged cells */
+}
+
+/* Styling for Game Over */
+#game_over {
+    color: red;
+    font-weight: bold;
+}
+
+/* Add any additional styling as needed */
