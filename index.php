@@ -1,7 +1,7 @@
 <html>
     <head>
         <title>Minesweeper</title>
-        <style>
+        <style> 
             .minesweeper-cell {
                 background-size: cover; 
                 width: 30px; 

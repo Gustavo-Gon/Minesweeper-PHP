@@ -1,5 +1,5 @@
 class Minesweeper {
-    static get SIZE()  { return 15; }
+    static get SIZE()  { return 15; } 
     static get BOMB()  { return "B"; }
     static get EMPTY() { return "E"; }
 
@@ -7,13 +7,8 @@ class Minesweeper {
         this.rows = rows;
         this.columns = columns;
         this.bombs = Math.floor(rows * columns * probability_chance);
-        if (!this.cells) {
-            this.cells = Array.from({ length: rows }, () => Array(columns).fill(Minesweeper.EMPTY));
-            this.placeBombs();
-        }
-    }
-
-    placeBombs() {
+        this.cells = Array.from({ length: rows }, () => Array(columns).fill(Minesweeper.EMPTY));
+        // Place bombs
         let placedBombs = 0;
         while (placedBombs < this.bombs) {
             let x = Math.floor(Math.random() * this.rows);
@@ -34,43 +29,49 @@ class Minesweeper {
         }
     }
 
-    // Filled with a lot of console logs to help debug 
     flood_fill(x, y) {
         console.log(`Entering flood_fill for cell ${x},${y}`);
-    
+        
         // Check boundaries
         if (x < 0 || x >= this.rows || y < 0 || y >= this.columns) {
             console.log(`Exiting flood_fill for cell ${x},${y} due to boundary check.`);
             return;
         }
-    
+        
         const cell = document.getElementById(`${x}-${y}`);
-    
+        
         // Check to see if cell has been explored
         if (cell.getAttribute('data-explored') === 'true') {
             console.log(`Exiting flood_fill for cell ${x},${y} as it's already explored.`);
             return;
         }
-    
+        
         // Mark this cell as explored
         cell.setAttribute('data-explored', 'true');
-    
+        
         // Checks for bomb
         if(this.cells[x][y] === Minesweeper.BOMB) {
             console.log(`Exiting flood_fill for cell ${x},${y} due to bomb presence.`);
             return;
         }
     
-        const surroundingBombs = this.countSurroundingBombs(x, y);
-        if (surroundingBombs > 0){
-            console.log(`Cell ${x},${y} has ${surroundingBombs} surrounding bombs. Setting image.`);
-            this.setCellImage(cell, `${surroundingBombs}.png`);
+        // Inlined countSurroundingBombs logic
+        let count = 0;
+        for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+                if (i === 0 && j === 0) continue;
+                if (this.cells[x + i] && this.cells[x + i][y + j] === Minesweeper.BOMB) count++;
+            }
+        }
+        const surroundingBombs = count;
+    
+        if (surroundingBombs > 0) {
+            cell.style.backgroundImage = `url('./assets/${surroundingBombs}.png')`; // inlined setCellImage logic
             return;
         } else {
-            console.log(`Cell ${x},${y} is empty. Continuing flood fill.`);
-            this.setCellImage(cell, '0.png');
+            cell.style.backgroundImage = `url('./assets/0.png')`; // inlined setCellImage logic
         }
-    
+        
         // Recursive calls for neighboring cells
         this.flood_fill(x - 1, y);
         this.flood_fill(x + 1, y);
@@ -106,18 +107,27 @@ class Minesweeper {
     _open(x, y) {
         const cell = document.getElementById(`${x}-${y}`);
         if (this.cells[x][y] === Minesweeper.BOMB) {
-            this.setCellImage(cell, 'bomb.png');
+            cell.style.backgroundImage = `url('./assets/bomb.png')`; // inlined setCellImage logic
             document.getElementById("game_over").style.display = "block";
             this.lock();
         } else {
-            const surroundingBombs = this.countSurroundingBombs(x, y);
+            // Inlined countSurroundingBombs logic
+            let count = 0;
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    if (i === 0 && j === 0) continue;
+                    if (this.cells[x + i] && this.cells[x + i][y + j] === Minesweeper.BOMB) count++;
+                }
+            }
+            const surroundingBombs = count;
+    
             if (surroundingBombs > 0) {
-                this.setCellImage(cell, `${surroundingBombs}.png`);
+                cell.style.backgroundImage = `url('./assets/${surroundingBombs}.png')`; // inlined setCellImage logic
             } else {
-                this.setCellImage(cell, '0.png');
+                cell.style.backgroundImage = `url('./assets/0.png')`; // inlined setCellImage logic
                 this.flood_fill(x, y);
             }
-            
+    
             console.log(`State of cell (0,0) - Inner Text: ${document.getElementById("0-0").innerText}, Background Image: ${document.getElementById("0-0").style.backgroundImage}`);
             if (this.is_winning_choice()) {
                 console.log("Player has won the game, displaying message.");
@@ -128,6 +138,7 @@ class Minesweeper {
             }
         }
     }
+    
     
 
     
@@ -152,10 +163,6 @@ class Minesweeper {
     }
     
     
-    setCellImage(cell, imageName) {
-        console.log(`Setting cell image to ${imageName}`);
-        cell.style.backgroundImage = `url('./assets/${imageName}')`;
-    }
 
     explore(x, y) {
         if (x < 0 || x >= this.rows || y < 0 || y >= this.columns) return;
@@ -172,16 +179,6 @@ class Minesweeper {
         this.flood_fill(x, y + 1);
     }
 
-    countSurroundingBombs(x, y) {
-        let count = 0;
-        for (let i = -1; i <= 1; i++) {
-            for (let j = -1; j <= 1; j++) {
-                if (i === 0 && j === 0) continue;
-                if (this.cells[x + i] && this.cells[x + i][y + j] === Minesweeper.BOMB) count++;
-            }
-        }
-        return count;
-    }
 
     is_winning_choice() {
         for (let i = 0; i < this.rows; i++) {
